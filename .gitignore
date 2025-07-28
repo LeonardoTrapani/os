@@ -1,0 +1,103 @@
+# ---- OS/Editor/Tool generated crap ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.lock
+*.log
+*.orig
+*.un~
+*~
+*#
+
+# ---- System-specific junk ----
+.cache/
+.local/
+Trash/
+.trash/
+*.pid
+
+# ---- Secrets & tokens ----
+*.key
+*.pem
+*.crt
+*.asc
+*.gpg
+*.enc
+
+# ---- Shell stuff ----
+.zsh_history
+.bash_history
+.fish_history
+
+# ---- Git ----
+.gitconfig.local
+.git-credentials
+.gitignore_global
+
+# ---- SSH ----
+.ssh/
+!ssh/config  # Uncomment if you DO want to track your ssh config
+
+# ---- AWS ----
+.aws/credentials
+
+# ---- GCP / Azure ----
+.config/gcloud/
+.azure/
+
+# ---- Neovim / Vim ----
+.config/nvim/backup/
+.config/nvim/swap/
+.config/nvim/undo/
+.config/nvim/lazy-lock.json
+nvim/.config/nvim/lua/trapani/lazy/theme.lua
+
+# ---- Other CLI tools ----
+.config/gh/hosts.yml
+.config/lazygit/state.yml
+.config/starship.toml.bak
+
+# ---- GUI apps ----
+.config/Code/User/globalStorage/
+.config/Code/User/workspaceStorage/
+.config/Code/CachedData/
+.config/obsidian/
+
+# ---- Node / Python / Rust / Go ----
+node_modules/
+.env
+.env.*
+.nvm/
+.npm/
+.pyenv/
+.rbenv/
+.venv/
+__pycache__/
+target/
+dist/
+build/
+
+# ---- Docker / Vagrant ----
+.docker/
+.vagrant/
+
+# ---- Tmux ----
+.tmux/resurrect/
+.tmux/plugins/
+tmux/.config/tmux/plugins/
+
+# ---- Backups ----
+*~
+*.bak
+*.old
+*.save
+
+# ---- IDEs ----
+.idea/
+.vs
+

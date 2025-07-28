@@ -1,0 +1,21 @@
+session_name: dpbe
+start_directory: ~/dev/techfolio-backend
+windows:
+  - window_name: editor
+    focus: true
+    panes:
+      - shell_command:
+          - nvim
+  - window_name: server
+    layout: main-vertical
+    main_pane_width: 70%
+    panes:
+      - shell_command:
+          -
+        focus: true
+      - shell_command:
+          - ./manage.sh runserver
+      - shell_command:
+          - cd ..
+          - cd techfolio-frontend
+          - pnpm dev
