@@ -32,7 +32,6 @@ return {
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 
 		-- UI enhancements for LSP
-		{ "j-hui/fidget.nvim", opts = {} },
 		{ "https://git.sr.ht/~whynothugo/lsp_lines.nvim" },
 
 		-- Completion framework and sources
@@ -90,8 +89,6 @@ return {
 			tailwindcss = {},
 		}
 
-		-- Initialize Fidget for LSP progress
-		require("fidget").setup({})
 
 		-- Setup Mason for LSP server management
 		require("mason").setup()
