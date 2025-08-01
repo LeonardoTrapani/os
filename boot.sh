@@ -18,6 +18,11 @@ readonly OMARCHY_DIR="$HOME/.local/share/omarchy"
 readonly BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
 
 readonly CONFIGS=("aws" "bash" "git" "hypr" "nvim" "tmux")
+
+# Initialize arrays to prevent unbound variable errors
+AVAILABLE_SCRIPTS=()
+SELECTED_CONFIGS=()
+SELECTED_SCRIPTS=()
 ansi_art='
     ███        ▄████████    ▄████████    ▄███████▄    ▄████████ ███▄▄▄▄    ▄█  
 ▀█████████▄   ███    ███   ███    ███   ███    ███   ███    ███ ███▀▀▀██▄ ███  
@@ -124,73 +129,109 @@ install_dependencies() {
         log_success "All dependencies already installed"
     fi
 }
-select_configurations() {
-    log_header "Configuration Selection"
+# Generic selection function to reduce code duplication
+select_items() {
+    local -n items_array=$1
+    local -n selected_array=$2
+    local item_type="$3"
+    local header="$4"
     
-    echo -e "${WHITE}Available configurations:${NC}"
+    log_header "$header"
+    
+    echo -e "${WHITE}Available ${item_type}s:${NC}"
     echo
     
-    for i in "${!CONFIGS[@]}"; do
-        local config="${CONFIGS[$i]}"
+    for i in "${!items_array[@]}"; do
+        local item="${items_array[$i]}"
         local desc=""
-        case "$config" in
+        case "$item" in
             "aws") desc="AWS CLI configuration and profiles" ;;
             "bash") desc="Enhanced shell with aliases and Starship prompt" ;;
             "git") desc="Git aliases and workflow optimizations" ;;
             "hypr") desc="Hyprland window manager configuration" ;;
             "nvim") desc="LazyVim-based Neovim configuration" ;;
             "tmux") desc="Feature-rich terminal multiplexer setup" ;;
+            "ssh") desc="Configure SSH to use 1Password identity agent" ;;
+            *) desc="Custom script: $item" ;;
         esac
-        printf "${CYAN}%2d${NC}) ${BOLD}%-8s${NC} - %s\n" $((i+1)) "$config" "$desc"
+        printf "${CYAN}%2d${NC}) ${BOLD}%-8s${NC} - %s\n" $((i+1)) "$item" "$desc"
     done
     
     echo
-    echo -e "${CYAN} a${NC}) ${BOLD}All configurations${NC}"
-    echo -e "${CYAN} q${NC}) ${BOLD}Quit${NC}"
+    echo -e "${CYAN} a${NC}) ${BOLD}All ${item_type}s${NC}"
+    if [[ "$item_type" == "script" ]]; then
+        echo -e "${CYAN} n${NC}) ${BOLD}No scripts${NC}"
+    else
+        echo -e "${CYAN} q${NC}) ${BOLD}Quit${NC}"
+    fi
     echo
     
-    local selected_configs=()
-    
     while true; do
-        echo -ne "${WHITE}Select configurations${NC} (comma-separated numbers, 'a' for all, 'q' to quit): "
+        if [[ "$item_type" == "script" ]]; then
+            echo -ne "${WHITE}Select ${item_type}s to run${NC} (comma-separated numbers, 'a' for all, 'n' for none): "
+        else
+            echo -ne "${WHITE}Select ${item_type}s${NC} (comma-separated numbers, 'a' for all, 'q' to quit): "
+        fi
         read -r selection
         
         case "$selection" in
             "q"|"Q") 
-                log_info "Installation cancelled by user"
-                exit 0
+                if [[ "$item_type" != "script" ]]; then
+                    log_info "Installation cancelled by user"
+                    exit 0
+                fi
+                ;;
+            "n"|"N")
+                if [[ "$item_type" == "script" ]]; then
+                    selected_array=()
+                    break
+                fi
                 ;;
             "a"|"A")
-                selected_configs=("${CONFIGS[@]}")
+                selected_array=("${items_array[@]}")
                 break
                 ;;
             *) 
-                IFS=',' read -ra ADDR <<< "$selection"
-                selected_configs=()
+                if [[ -z "$selection" ]]; then
+                    log_error "Please make a selection"
+                    continue
+                fi
+                
+                IFS=',' read -ra selections <<< "$selection"
+                selected_array=()
                 local valid=true
                 
-                for i in "${ADDR[@]}"; do
-                    i=$(echo "$i" | xargs)
-                    if [[ "$i" =~ ^[0-9]+$ ]] && [[ $i -ge 1 ]] && [[ $i -le ${#CONFIGS[@]} ]]; then
-                        selected_configs+=("${CONFIGS[$((i-1))]}")
+                for sel in "${selections[@]}"; do
+                    sel="${sel// /}"  # Remove spaces
+                    if [[ "$sel" =~ ^[0-9]+$ ]] && [[ $sel -ge 1 ]] && [[ $sel -le ${#items_array[@]} ]]; then
+                        selected_array+=("${items_array[$((sel-1))]}")
                     else
-                        log_error "Invalid selection: $i"
+                        log_error "Invalid selection: $sel"
                         valid=false
                         break
                     fi
                 done
                 
-                if [[ "$valid" = true ]] && [[ ${#selected_configs[@]} -gt 0 ]]; then
+                if [[ "$valid" = true ]] && [[ ${#selected_array[@]} -gt 0 ]]; then
                     break
+                elif [[ "$valid" = true ]] && [[ ${#selected_array[@]} -eq 0 ]]; then
+                    log_error "No valid selections made"
                 fi
                 ;;
         esac
     done
     
     echo
-    log_info "Selected configurations: ${selected_configs[*]}"
+    if [[ ${#selected_array[@]} -gt 0 ]]; then
+        log_info "Selected ${item_type}s: ${selected_array[*]}"
+    else
+        log_info "No ${item_type}s selected"
+    fi
     echo
-    SELECTED_CONFIGS=("${selected_configs[@]}")
+}
+
+select_configurations() {
+    select_items CONFIGS SELECTED_CONFIGS "configuration" "Configuration Selection"
 }
 
 select_scripts() {
@@ -202,72 +243,7 @@ select_scripts() {
         return
     fi
     
-    log_header "Additional Scripts Selection"
-    
-    echo -e "${WHITE}Available scripts:${NC}"
-    echo
-    
-    for i in "${!AVAILABLE_SCRIPTS[@]}"; do
-        local script="${AVAILABLE_SCRIPTS[$i]}"
-        local desc=""
-        case "$script" in
-            "ssh") desc="Configure SSH to use 1Password identity agent" ;;
-            *) desc="Custom script: $script" ;;
-        esac
-        printf "${CYAN}%2d${NC}) ${BOLD}%-8s${NC} - %s\n" $((i+1)) "$script" "$desc"
-    done
-    
-    echo
-    echo -e "${CYAN} a${NC}) ${BOLD}All scripts${NC}"
-    echo -e "${CYAN} n${NC}) ${BOLD}No scripts${NC}"
-    echo
-    
-    local selected_scripts=()
-    
-    while true; do
-        echo -ne "${WHITE}Select scripts to run${NC} (comma-separated numbers, 'a' for all, 'n' for none): "
-        read -r selection
-        
-        case "$selection" in
-            "n"|"N")
-                selected_scripts=()
-                break
-                ;;
-            "a"|"A")
-                selected_scripts=("${AVAILABLE_SCRIPTS[@]}")
-                break
-                ;;
-            *) 
-                IFS=',' read -ra ADDR <<< "$selection"
-                selected_scripts=()
-                local valid=true
-                
-                for i in "${ADDR[@]}"; do
-                    i=$(echo "$i" | xargs)
-                    if [[ "$i" =~ ^[0-9]+$ ]] && [[ $i -ge 1 ]] && [[ $i -le ${#AVAILABLE_SCRIPTS[@]} ]]; then
-                        selected_scripts+=("${AVAILABLE_SCRIPTS[$((i-1))]}")
-                    else
-                        log_error "Invalid selection: $i"
-                        valid=false
-                        break
-                    fi
-                done
-                
-                if [[ "$valid" = true ]]; then
-                    break
-                fi
-                ;;
-        esac
-    done
-    
-    echo
-    if [[ ${#selected_scripts[@]} -gt 0 ]]; then
-        log_info "Selected scripts: ${selected_scripts[*]}"
-    else
-        log_info "No scripts selected"
-    fi
-    echo
-    SELECTED_SCRIPTS=("${selected_scripts[@]}")
+    select_items AVAILABLE_SCRIPTS SELECTED_SCRIPTS "script" "Additional Scripts Selection"
 }
 
 backup_configs() {
@@ -380,17 +356,15 @@ install_omarchy() {
     fi
     if [[ -n "${OMARCHY_REF:-}" ]]; then
         log_info "Using Omarchy branch: $OMARCHY_REF"
-        cd "$OMARCHY_DIR"
-        if git fetch origin "$OMARCHY_REF" && git checkout "$OMARCHY_REF" &> /dev/null; then
+        if (cd "$OMARCHY_DIR" && git fetch origin "$OMARCHY_REF" && git checkout "$OMARCHY_REF") &> /dev/null; then
             log_success "Switched to branch $OMARCHY_REF"
         else
             log_warning "Failed to switch to branch $OMARCHY_REF, using default"
         fi
-        cd - > /dev/null
     fi
     
     show_progress "Running Omarchy installation script"
-    if source "$OMARCHY_DIR/install.sh" &> /dev/null; then
+    if (cd "$OMARCHY_DIR" && bash "./install.sh") &> /dev/null; then
         show_done
         log_success "Omarchy installed successfully"
     else
@@ -474,6 +448,6 @@ main() {
     post_install
 }
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ "${BASH_SOURCE[0]:-$0}" == "${0}" ]]; then
     main "$@"
 fi
