@@ -16,12 +16,12 @@ readonly OMARCHY_REPO="https://github.com/leonardotrapani/omarchy.git"
 readonly INSTALL_DIR="$HOME/.local/share/trapani-os"
 readonly OMARCHY_DIR="$HOME/.local/share/omarchy"
 readonly BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
+OMARCHY_BARE="${OMARCHY_BARE:-false}"
 
 readonly CONFIGS=("aws" "bash" "git" "hypr" "nvim" "tmux")
 
 # Initialize arrays to prevent unbound variable errors
 AVAILABLE_SCRIPTS=()
-SELECTED_CONFIGS=()
 SELECTED_SCRIPTS=()
 ansi_art='
     ███        ▄████████    ▄████████    ▄███████▄    ▄████████ ███▄▄▄▄    ▄█  
@@ -117,11 +117,10 @@ install_dependencies() {
     done
     
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
-        show_progress "Installing missing dependencies: ${missing_deps[*]}"
-        if sudo pacman -Sy --noconfirm --needed "${missing_deps[@]}" &> /dev/null; then
-            show_done
+        log_info "Installing missing dependencies: ${missing_deps[*]}"
+        if sudo pacman -Sy --noconfirm --needed "${missing_deps[@]}"; then
+            log_success "Dependencies installed successfully"
         else
-            show_failed
             log_error "Failed to install dependencies"
             exit 1
         fi
@@ -129,112 +128,13 @@ install_dependencies() {
         log_success "All dependencies already installed"
     fi
 }
-# Generic selection function to reduce code duplication
-select_items() {
-    local -n items_array=$1
-    local -n selected_array=$2
-    local item_type="$3"
-    local header="$4"
-    
-    log_header "$header"
-    
-    echo -e "${WHITE}Available ${item_type}s:${NC}"
-    echo
-    
-    for i in "${!items_array[@]}"; do
-        local item="${items_array[$i]}"
-        local desc=""
-        case "$item" in
-            "aws") desc="AWS CLI configuration and profiles" ;;
-            "bash") desc="Enhanced shell with aliases and Starship prompt" ;;
-            "git") desc="Git aliases and workflow optimizations" ;;
-            "hypr") desc="Hyprland window manager configuration" ;;
-            "nvim") desc="LazyVim-based Neovim configuration" ;;
-            "tmux") desc="Feature-rich terminal multiplexer setup" ;;
-            "ssh") desc="Configure SSH to use 1Password identity agent" ;;
-            *) desc="Custom script: $item" ;;
-        esac
-        printf "${CYAN}%2d${NC}) ${BOLD}%-8s${NC} - %s\n" $((i+1)) "$item" "$desc"
-    done
-    
-    echo
-    echo -e "${CYAN} a${NC}) ${BOLD}All ${item_type}s${NC}"
-    if [[ "$item_type" == "script" ]]; then
-        echo -e "${CYAN} n${NC}) ${BOLD}No scripts${NC}"
-    else
-        echo -e "${CYAN} q${NC}) ${BOLD}Quit${NC}"
-    fi
-    echo
-    
-    while true; do
-        if [[ "$item_type" == "script" ]]; then
-            echo -ne "${WHITE}Select ${item_type}s to run${NC} (comma-separated numbers, 'a' for all, 'n' for none): "
-        else
-            echo -ne "${WHITE}Select ${item_type}s${NC} (comma-separated numbers, 'a' for all, 'q' to quit): "
-        fi
-        read -r selection
-        
-        case "$selection" in
-            "q"|"Q") 
-                if [[ "$item_type" != "script" ]]; then
-                    log_info "Installation cancelled by user"
-                    exit 0
-                fi
-                ;;
-            "n"|"N")
-                if [[ "$item_type" == "script" ]]; then
-                    selected_array=()
-                    break
-                fi
-                ;;
-            "a"|"A")
-                selected_array=("${items_array[@]}")
-                break
-                ;;
-            *) 
-                if [[ -z "$selection" ]]; then
-                    log_error "Please make a selection"
-                    continue
-                fi
-                
-                IFS=',' read -ra selections <<< "$selection"
-                selected_array=()
-                local valid=true
-                
-                for sel in "${selections[@]}"; do
-                    sel="${sel// /}"  # Remove spaces
-                    if [[ "$sel" =~ ^[0-9]+$ ]] && [[ $sel -ge 1 ]] && [[ $sel -le ${#items_array[@]} ]]; then
-                        selected_array+=("${items_array[$((sel-1))]}")
-                    else
-                        log_error "Invalid selection: $sel"
-                        valid=false
-                        break
-                    fi
-                done
-                
-                if [[ "$valid" = true ]] && [[ ${#selected_array[@]} -gt 0 ]]; then
-                    break
-                elif [[ "$valid" = true ]] && [[ ${#selected_array[@]} -eq 0 ]]; then
-                    log_error "No valid selections made"
-                fi
-                ;;
-        esac
-    done
-    
-    echo
-    if [[ ${#selected_array[@]} -gt 0 ]]; then
-        log_info "Selected ${item_type}s: ${selected_array[*]}"
-    else
-        log_info "No ${item_type}s selected"
-    fi
+setup_configurations() {
+    log_header "Setting Up All Configurations"
+    log_info "Installing all available configurations: ${CONFIGS[*]}"
     echo
 }
 
-select_configurations() {
-    select_items CONFIGS SELECTED_CONFIGS "configuration" "Configuration Selection"
-}
-
-select_scripts() {
+setup_scripts() {
     discover_scripts
     
     if [[ ${#AVAILABLE_SCRIPTS[@]} -eq 0 ]]; then
@@ -243,7 +143,10 @@ select_scripts() {
         return
     fi
     
-    select_items AVAILABLE_SCRIPTS SELECTED_SCRIPTS "script" "Additional Scripts Selection"
+    log_header "Setting Up All Scripts"
+    log_info "Running all available scripts: ${AVAILABLE_SCRIPTS[*]}"
+    SELECTED_SCRIPTS=("${AVAILABLE_SCRIPTS[@]}")
+    echo
 }
 
 backup_configs() {
@@ -251,7 +154,7 @@ backup_configs() {
     
     local backed_up=false
     
-    for config in "${SELECTED_CONFIGS[@]}"; do
+    for config in "${CONFIGS[@]}"; do
         local config_paths=()
         
         case "$config" in
@@ -325,7 +228,7 @@ install_configurations() {
     
     cd "$INSTALL_DIR"
     
-    for config in "${SELECTED_CONFIGS[@]}"; do
+    for config in "${CONFIGS[@]}"; do
         show_progress "Installing $config configuration"
         if stow "$config" &> /dev/null; then
             show_done
@@ -336,42 +239,25 @@ install_configurations() {
         fi
     done
     
-    log_success "All selected configurations installed successfully"
+    log_success "All configurations installed successfully"
 }
 install_omarchy() {
     log_header "Installing Omarchy Base System"
-    if [[ -d "$OMARCHY_DIR" ]]; then
-        show_progress "Removing existing Omarchy installation"
-        rm -rf "$OMARCHY_DIR"
-        show_done
-    fi
     
-    show_progress "Cloning Omarchy repository"
-    if git clone "$OMARCHY_REPO" "$OMARCHY_DIR" &> /dev/null; then
-        show_done
-    else
-        show_failed
-        log_error "Failed to clone Omarchy repository"
-        exit 1
-    fi
+    echo -e "\nCloning Omarchy..."
+    rm -rf "$OMARCHY_DIR"
+    git clone "$OMARCHY_REPO" "$OMARCHY_DIR" >/dev/null
+    
+    # Use custom branch if instructed
     if [[ -n "${OMARCHY_REF:-}" ]]; then
-        log_info "Using Omarchy branch: $OMARCHY_REF"
-        if (cd "$OMARCHY_DIR" && git fetch origin "$OMARCHY_REF" && git checkout "$OMARCHY_REF") &> /dev/null; then
-            log_success "Switched to branch $OMARCHY_REF"
-        else
-            log_warning "Failed to switch to branch $OMARCHY_REF, using default"
-        fi
+        echo -e "\nUsing branch: $OMARCHY_REF"
+        cd "$OMARCHY_DIR"
+        git fetch origin "$OMARCHY_REF" && git checkout "$OMARCHY_REF"
+        cd - >/dev/null
     fi
     
-    show_progress "Running Omarchy installation script"
-    if (cd "$OMARCHY_DIR" && bash "./install.sh") &> /dev/null; then
-        show_done
-        log_success "Omarchy installed successfully"
-    else
-        show_failed
-        log_error "Omarchy installation failed"
-        exit 1
-    fi
+    echo -e "\nInstallation starting..."
+    source "$OMARCHY_DIR/install.sh"
 }
 
 run_selected_scripts() {
@@ -387,11 +273,13 @@ run_selected_scripts() {
         local script_path="scripts/${script}.sh"
         if [[ -f "$script_path" ]]; then
             chmod +x "$script_path"
-            show_progress "Running $script script"
-            if bash "$script_path" &> /dev/null; then
-                show_done
+            log_info "Running $script script (output will be shown below)"
+            echo -e "${YELLOW}--- Script $script Output ---${NC}"
+            if bash "$script_path"; then
+                echo -e "${YELLOW}--- End Script $script Output ---${NC}"
+                log_success "Script $script completed successfully"
             else
-                show_failed
+                echo -e "${YELLOW}--- End Script $script Output ---${NC}"
                 log_warning "Script $script failed but installation will continue"
             fi
         else
@@ -404,15 +292,9 @@ run_selected_scripts() {
 
 post_install() {
     log_header "Post-Installation Tasks"
-    if [[ " ${SELECTED_CONFIGS[*]} " =~ " bash " ]]; then
-        log_info "Bash configuration installed. Run 'source ~/.bashrc' or restart your terminal"
-    fi
-    if [[ " ${SELECTED_CONFIGS[*]} " =~ " tmux " ]]; then
-        log_info "Tmux configuration installed. Press 'prefix + I' in tmux to install plugins"
-    fi
-    if [[ " ${SELECTED_CONFIGS[*]} " =~ " nvim " ]]; then
-        log_info "Neovim configuration installed. LazyVim will auto-install plugins on first run"
-    fi
+    log_info "Bash configuration installed. Run 'source ~/.bashrc' or restart your terminal"
+    log_info "Tmux configuration installed. Press 'prefix + I' in tmux to install plugins"
+    log_info "Neovim configuration installed. LazyVim will auto-install plugins on first run"
     
     log_success "Installation completed successfully!"
     echo
@@ -438,10 +320,10 @@ main() {
     
     check_system
     install_dependencies
-    select_configurations
+    setup_configurations
     backup_configs
     clone_repository
-    select_scripts
+    setup_scripts
     install_configurations
     install_omarchy
     run_selected_scripts

@@ -55,8 +55,7 @@ cd os
 
 The `boot.sh` installer provides:
 
-- **Interactive Configuration Selection** - Choose specific modules or install all
-- **Script Selection** - Run additional utility scripts (SSH, etc.)
+- **Automatic Installation** - Installs all available configurations and scripts automatically
 - **Dependency Resolution** - Automatic installation of required packages via pacman
 - **Configuration Backup** - Automatic backup of existing dotfiles with timestamps
 - **Omarchy Integration** - Seamless installation of the base Arch + Hyprland system
@@ -177,6 +176,15 @@ Additional utility scripts that can be optionally installed:
 - **Extensible** - Easy to add custom automation scripts
 
 ## System Integration
+
+### Automated Installation Process
+
+The installation script automatically:
+
+1. **Installs All Configurations** - No user interaction required for selection
+2. **Runs All Available Scripts** - Executes any utility scripts found in the scripts/ directory
+3. **Handles Dependencies** - Automatically installs git, stow, and other requirements
+4. **Manages Backups** - Creates timestamped backups of existing configurations
 
 ### Omarchy Integration
 
