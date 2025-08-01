@@ -1,185 +1,280 @@
-# 🌟 Trapani's Dotfiles
+```bash
+wget -qO- https://os.trapani.sh | bash
+```
 
-A comprehensive dotfiles collection built on top of [omarchy](https://github.com/LeonardoTrapani/omarchy) - an opinionated Arch + Hyprland setup. These dotfiles extend and customize the omarchy base configuration with personal preferences and additional tools.
+# Trapani's OS Configuration
 
-## 📦 What's Included
+A meticulously crafted dotfiles ecosystem built on GNU Stow and seamlessly integrated with [Omarchy](https://github.com/leonardotrapani/omarchy) - delivering a cohesive, high-performance development environment for Arch Linux.
 
-### 🖥️ **Desktop Environment**
+## Architecture Overview
 
-- **Hyprland** - Modern Wayland compositor with custom keybindings and window rules
-- **Hyprlock** - Screen locking with custom styling
-- **Hypridle** - Idle management and auto-lock configuration
+This configuration system employs a modular architecture using GNU Stow for symlink management, enabling atomic installation and removal of configuration modules. Each configuration is self-contained within its own directory, following XDG Base Directory specifications where applicable.
 
-### 🛠️ **Development Tools**
+```
+├── aws/           # AWS CLI profiles and configuration
+├── bash/          # Shell configuration with Starship integration
+├── git/           # Git workflow optimizations and aliases
+├── hypr/          # Hyprland compositor configuration
+├── nvim/          # LazyVim-based Neovim setup
+├── tmux/          # Terminal multiplexer with plugin ecosystem
+├── scripts/       # Additional utility scripts
+└── boot.sh       # Automated installation orchestrator
+```
 
-- **Neovim** - LazyVim-based configuration with custom Lua modules
-- **Git** - Comprehensive aliases and workflow optimizations
-- **Tmux** - Feature-rich terminal multiplexer with plugins and custom layouts
-- **Bash** - Enhanced shell with aliases, Starship prompt integration
+## Technical Stack
 
-### 🎨 **Theming & Customization**
+- **Configuration Management**: GNU Stow for atomic symlink operations
+- **Base System**: Omarchy (Arch Linux + Hyprland + coordinated theming)
+- **Editor**: Neovim with LazyVim framework and Lua-based configuration
+- **Terminal Multiplexer**: Tmux with TPM plugin management
+- **Shell**: Bash with Starship prompt and performance optimizations
+- **Version Control**: Git with workflow-optimized aliases and LFS support
+- **Window Manager**: Hyprland with custom keybindings and monitor configurations
 
-- **Built on Omarchy** - Extends the opinionated Arch + Hyprland base setup
-- **Multiple Themes** - Catppuccin, Nord, Tokyo Night, Gruvbox, Rose Pine, Kanagawa, Everforest, and more
-- **Coordinated Styling** - Consistent colors across terminal, editor, and desktop
-- **Personal Overrides** - Custom configurations on top of omarchy defaults
+## Installation Methods
 
-### ☁️ **Cloud & Tools**
-
-- **AWS CLI** - Preconfigured settings and profiles
-
-## 🚀 Installation
-
-### Prerequisites
-
-- **Arch Linux** (or Arch-based distribution)
-- [Omarchy](https://github.com/LeonardoTrapani/omarchy) - The opinionated Arch + Hyprland setup (install first)
-- [GNU Stow](https://www.gnu.org/software/stow/) for symlink management
-
-### Quick Setup
-
-1. **Install omarchy first:**
-
-   ```bash
-   # Clone and install the omarchy base setup
-   git clone https://github.com/LeonardoTrapani/omarchy.git
-   cd omarchy
-   # Follow omarchy installation instructions to get base Arch + Hyprland setup
-   ```
-
-2. **Clone this dotfiles repository:**
-
-   ```bash
-   git clone https://github.com/lenardotrapani/os.git ~/.dotfiles
-   cd ~/.dotfiles
-   ```
-
-3. **Stow the configurations you want:**
-
-   ```bash
-   # Install all configurations
-   stow aws bash git hypr nvim omarchy tmux
-
-   # Or install selectively
-   stow nvim tmux bash git
-   ```
-
-## 🚀 Automated Installation Script
-
-**Next Step: Create a comprehensive installation script that automates the entire setup process.**
-
-The planned installation script will:
-
-1. **Check omarchy installation** - Verify the base Arch + Hyprland setup is installed
-2. **Install dependencies** - Install additional packages needed for these dotfiles
-3. **Stow dotfiles** - Automatically symlink all configuration files using GNU Stow
-4. **Apply personal configurations** - Layer personal configs over omarchy defaults
-5. **Configure themes** - Set up theme selection and switching capabilities
-6. **Shell integration** - Enhance bash/zsh with additional aliases and starship integration
-
-### Planned Usage:
+### Primary Installation (Recommended)
 
 ```bash
-# One-command installation
-curl -fsSL https://raw.githubusercontent.com/leonardotrapani/os/main/install.sh | bash
+wget -qO- https://os.trapani.sh | bash
+```
 
-# Or clone and run locally
+### Alternative Methods
+
+```bash
+# Using curl
+curl -fsSL https://os.trapani.sh | bash
+
+# Local installation
 git clone https://github.com/leonardotrapani/os.git
 cd os
-./install.sh
+./boot.sh
 ```
 
-### Script Features:
+### Installation Features
 
-- **Interactive prompts** for customization options
-- **Dependency checking** and automatic installation
-- **Backup existing configs** before overwriting
-- **Theme selection** during setup
-- **Post-install verification** and troubleshooting
-- **Rollback capability** if installation fails
+The `boot.sh` installer provides:
 
-## 📂 Configuration Details
+- **Interactive Configuration Selection** - Choose specific modules or install all
+- **Script Selection** - Run additional utility scripts (SSH, etc.)
+- **Dependency Resolution** - Automatic installation of required packages via pacman
+- **Configuration Backup** - Automatic backup of existing dotfiles with timestamps
+- **Omarchy Integration** - Seamless installation of the base Arch + Hyprland system
+- **Error Recovery** - Comprehensive error handling with rollback capabilities
+- **Progress Visualization** - Real-time installation progress with colored output
 
-### **Bash** (`bash/`)
-
-- Custom aliases for common commands (`v` for nvim, `g` for git, etc.)
-- Starship prompt integration
-- Omarchy bash configuration sourcing
-- Pyenv setup and PATH configuration
-
-### **Git** (`git/`)
-
-- User configuration (name and email)
-- Useful aliases: `st`, `br`, `ps`, `pl`, `c`, `a`, `hist`, `llog`
-- Git LFS support
-- Neovim as default editor
-
-### **Hyprland** (`hypr/`)
-
-- **Main config** - Sources omarchy defaults with personal overrides
-- **Monitor setup** - Separate `monitors.conf` for portability
-- **Lock screen** - Custom hyprlock configuration
-- **Idle management** - Auto-lock and power management
-- **Keybindings** - Terminal, browser, file manager, and media controls
-
-### **Neovim** (`nvim/`)
-
-- **LazyVim** - Based on the popular Neovim distribution
-- **Custom Lua modules** - Personal configurations in `lua/trapani/`
-- **Plugin management** - Lazy.nvim with locked versions
-- **Theme integration** - Works with omarchy theme system
-
-### **Tmux** (`tmux/`)
-
-- **Rich plugin ecosystem** - TPM with curated plugins
-- **Custom layouts** - Predefined session layouts for different workflows
-- **Theme integration** - Multiple theme options matching omarchy
-- **Enhanced navigation** - Vim-style pane navigation
-- **Productivity features** - Session management, URL handling, copy/paste improvements
-
-### **Omarchy Extensions** (`omarchy/`)
-
-- **Theme Configurations** - Multiple color schemes (Catppuccin, Nord, Tokyo Night, etc.)
-- **Personal Overrides** - Custom theme files that extend omarchy's base setup
-- **Theme Switching** - Easy switching between different color schemes
-- **Application Integration** - Coordinated theming for Hyprland, Tmux, Neovim, and terminal
-
-## 🎯 Key Features
-
-- **🔄 Unified Theming** - Single theme change affects all applications
-- **⚡ Performance Optimized** - Lightweight configurations focused on speed
-- **🛠️ Developer Friendly** - Optimized for coding workflows and productivity
-- **🎨 Aesthetic Focus** - Clean, modern appearance across all components
-- **📱 Modular Design** - Use only what you need via selective stowing
-
-## 🔧 Customization
-
-### Adding New Themes
-
-Create additional themes that work with the omarchy base setup by adding theme configs:
+### Advanced Installation Options
 
 ```bash
-# Create a new theme extension
-mkdir -p omarchy/.config/omarchy/themes/mytheme
-# Add theme-specific configs (tmux.conf, neovim.lua, hyprland.conf, etc.)
-# These extend/override omarchy's default theming
+# Install with custom Omarchy branch
+OMARCHY_REF=custom-branch wget -qO- https://os.trapani.sh | bash
+
+# Environment variables for customization
+export OMARCHY_REF="develop"        # Use specific Omarchy branch
+export INSTALL_DIR="$HOME/dotfiles" # Custom installation directory
 ```
 
-### Personal Overrides
+## Configuration Modules
 
-- **Hyprland**: Edit `hypr/.config/hypr/monitors.conf` for display setup
-- **Bash**: Add personal aliases to `bash/.bashrc`
-- **Git**: Update user information in `git/.gitconfig`
-- **Tmux**: Add custom layouts to `tmux/.config/tmux/layouts/`
+### Bash (`bash/`)
 
-## 🤝 Related Projects
+Advanced shell configuration featuring:
 
-- **[Omarchy](https://github.com/LeonardoTrapani/omarchy)** - The theme management system powering this setup
+- **Performance Optimizations** - Lazy loading of expensive operations
+- **Starship Prompt Integration** - Git-aware, customizable prompt
+- **Intelligent Aliases** - Context-aware shortcuts and workflow enhancements
+- **Pyenv Integration** - Python version management with PATH optimization
 
-## 📝 License
+**Key Files:**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- `.bashrc` - Main configuration with omarchy sourcing
+- `.bash_profile` - Login shell initialization
+
+### Git (`git/`)
+
+Workflow-optimized Git configuration:
+
+- **Productivity Aliases** - `st` (status), `br` (branch), `ps` (push), `pl` (pull)
+- **Advanced Aliases** - `hist` (formatted history), `llog` (graph log)
+- **LFS Support** - Large file storage configuration
+- **Editor Integration** - Neovim as default editor with diff tools
+
+**Aliases Overview:**
+
+```bash
+git st    # git status
+git c     # git commit
+git a     # git add
+git br    # git branch
+git hist  # formatted commit history
+```
+
+### Hyprland (`hypr/`)
+
+Modern Wayland compositor configuration:
+
+- **Modular Architecture** - Separate monitor configuration for portability
+- **Custom Keybindings** - Optimized for development workflows
+- **Lock Screen Integration** - Hyprlock with custom styling
+- **Idle Management** - Hypridle for power management
+- **Omarchy Theme Integration** - Coordinated theming system
+
+**Configuration Structure:**
+
+- `hyprland.conf` - Main configuration sourcing omarchy defaults
+- `monitors.conf` - Portable monitor setup
+- `hyprlock.conf` - Lock screen styling
+- `hypridle.conf` - Idle management rules
+
+### Neovim (`nvim/`)
+
+LazyVim-based configuration with custom extensions:
+
+- **LazyVim Framework** - Modern plugin management and sensible defaults
+- **Custom Lua Modules** - Personal configurations in `lua/trapani/`
+- **Performance Tuned** - Lazy loading and optimized startup times
+- **Theme Integration** - Synchronized with omarchy theme system
+- **Language Support** - LSP, treesitter, and formatter configurations
+
+**Architecture:**
+
+```
+.config/nvim/
+├── init.lua              # Entry point
+├── lua/config/           # LazyVim configuration
+└── lua/trapani/          # Personal customizations
+```
+
+### Tmux (`tmux/`)
+
+Feature-rich terminal multiplexer setup:
+
+- **Plugin Ecosystem** - Curated plugins via TPM (Tmux Plugin Manager)
+- **Custom Layouts** - Predefined session layouts for different workflows
+- **Vim Integration** - Seamless pane navigation with vim keybindings
+- **Theme Coordination** - Multiple themes matching omarchy system
+- **Productivity Features** - URL handling, enhanced copy/paste, session management
+
+**Plugin Stack:**
+
+- `tmux-sensible` - Sensible default configurations
+- `tmux-yank` - Enhanced clipboard integration
+- Custom themes with omarchy coordination
+
+### AWS (`aws/`)
+
+AWS CLI configuration for cloud development:
+
+- **Profile Management** - Multiple AWS profiles for different environments
+- **CLI Optimizations** - Enhanced output formatting and shortcuts
+- **Integration Ready** - Compatible with AWS development workflows
+
+### Scripts (`scripts/`)
+
+Additional utility scripts that can be optionally installed:
+
+- **SSH Configuration** - Sets up 1Password identity agent integration
+- **Extensible** - Easy to add custom automation scripts
+
+## System Integration
+
+### Omarchy Integration
+
+This configuration system extends Omarchy's base setup:
+
+1. **Theme Coordination** - All configurations respect omarchy's theme system
+2. **Non-Conflicting** - Designed to layer over omarchy without conflicts
+3. **Base Dependency** - Requires omarchy for full functionality
+4. **Automatic Installation** - `boot.sh` handles omarchy setup automatically
+
+### Stow Management
+
+GNU Stow creates symbolic links from the configuration directories to their target locations:
+
+```bash
+# Manual stow operations
+stow nvim     # Links nvim/.config/nvim -> ~/.config/nvim
+stow tmux     # Links tmux/.config/tmux -> ~/.config/tmux
+stow bash     # Links bash/.bashrc -> ~/.bashrc
+
+# Remove configurations
+stow -D nvim  # Removes nvim symlinks
+```
+
+### Backup and Recovery
+
+The installation system automatically creates timestamped backups:
+
+```
+~/.config-backup-20240801-143022/
+├── .bashrc           # Original bash configuration
+├── .config/nvim/     # Original neovim setup
+└── .config/tmux/     # Original tmux configuration
+```
+
+## Customization
+
+### Adding Custom Configurations
+
+1. Create a new directory following stow conventions:
+
+```bash
+mkdir -p custom/.config/custom
+echo "# Custom config" > custom/.config/custom/config.conf
+```
+
+2. Install using stow:
+
+```bash
+stow custom
+```
+
+### Theme Customization
+
+Themes are managed through the omarchy integration. Custom themes can be added by:
+
+1. Creating theme files in the omarchy theme directory
+2. Extending configurations in each module to support the new theme
+3. Using omarchy's theme switching mechanism
+
+### Per-Module Customization
+
+Each configuration module can be customized independently:
+
+- **Hyprland**: Edit `monitors.conf` for display-specific settings
+- **Bash**: Add personal aliases to `.bashrc`
+- **Git**: Update user information in `.gitconfig`
+- **Tmux**: Add custom layouts in `.config/tmux/layouts/`
+
+## Requirements
+
+- **Operating System**: Arch Linux or Arch-based distribution
+- **Package Manager**: pacman
+- **Dependencies**: git, stow (automatically installed)
+- **Base System**: Omarchy (automatically installed)
+- **Privileges**: sudo access for package installation
+
+## Security Considerations
+
+- All configurations follow security best practices
+- No hardcoded credentials or sensitive information
+- Automatic backup system prevents data loss
+- Modular installation allows minimal surface area
+- Open source and auditable codebase
+
+## Contributing
+
+This is a personal dotfiles repository, but contributions are welcome:
+
+1. Fork the repository
+2. Create a feature branch
+3. Test configurations in a clean environment
+4. Submit a pull request with detailed description
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-_Built for productivity, designed for aesthetics_ ✨
+_Engineered for performance, designed for productivity_ ⚡
