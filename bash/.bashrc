@@ -35,3 +35,11 @@ source <(op completion bash)
 source ~/.config/op/plugins.sh
 
 export SSH_AUTH_SOCK=~/.1password/agent.sock
+
+# pnpm
+export PNPM_HOME="/home/trapani/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

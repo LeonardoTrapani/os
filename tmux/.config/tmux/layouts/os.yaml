@@ -1,10 +1,10 @@
 session_name: os
 start_directory: ~/
 windows:
-  - window_name: trapani-os
+  - window_name: os
     panes:
       - shell_command:
-        - cd trapani-os
+        - cd os
         - clear
   - window_name: config
     panes:
