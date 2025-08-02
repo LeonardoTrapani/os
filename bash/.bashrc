@@ -12,8 +12,10 @@ alias g='git'
 # Package manager
 alias npm='pnpm'
 
-# Tmux session loader
+# Tmux
 alias tls='tmuxp load'
+alias tks='tmux kill-session'
+alias tksv='tmux kill-server'
 
 # Clear terminal
 alias c='clear'
