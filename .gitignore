@@ -51,10 +51,10 @@ Trash/
 .azure/
 
 # ---- Neovim / Vim ----
-.config/nvim/backup/
-.config/nvim/swap/
-.config/nvim/undo/
-.config/nvim/lazy-lock.json
+nvim/.config/nvim/backup/
+nvim/.config/nvim/swap/
+nvim/.config/nvim/undo/
+nvim/.config/nvim/lazy-lock.json
 nvim/.config/nvim/lua/trapani/lazy/theme.lua
 
 # ---- Other CLI tools ----
